@@ -1,0 +1,31 @@
+import pandas as pd
+from statsmodels.tsa.holtwinters import Holt
+import matplotlib.pyplot as plt
+
+# Введемо дані в датафрейм
+data = [462523, 633208, 660159, 617455, 597354, 793517, 1015944, 1148052, 
+        1156623, 1255021, 1410114, 1357230, 1003317, 1097048, 1498977]
+idx = pd.date_range(start='2019-01-01', end='2020-03-01', freq='MS')
+df = pd.DataFrame(data, index=idx, columns=['value'])
+
+# Побудуємо модель
+model = Holt(df['value']).fit(smoothing_level=0.3, smoothing_slope=0.1)
+
+# Зробимо прогноз наступних 3 місяців
+forecast = model.forecast(steps=3)
+
+# Виведемо результат
+print(forecast)
+
+# Додамо прогнозовані значення до датафрейму
+df_pred = pd.concat([df, pd.DataFrame(forecast, columns=['value'], 
+                    index=pd.date_range(start='2020-04-01', periods=3, freq='MS'))])
+
+# Візуалізуємо часовий ряд та прогноз
+plt.plot(df_pred, label='Часовий ряд')
+plt.plot(df_pred.loc['2020-04-01':], label='Прогноз', linestyle='--')
+plt.title('Прогнозування часового ряду')
+plt.xlabel('Час')
+plt.ylabel('Значення')
+plt.legend()
+plt.show()
